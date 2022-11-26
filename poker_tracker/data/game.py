@@ -41,5 +41,4 @@ class Game:
         self.hands = {}
 
     def __str__(self):
-        printed = '<' + "Game ID : " + str(self.id) + '>'
-        return printed
+        return '<' + "Game ID : " + str(self.id) + '>'

@@ -38,12 +38,12 @@ class Action:
         self.position = position
 
     def __eq__(self, other):
-        if self.action_type == other.action_type and self.amount == other.amount and self.position == other.position:
-            return True
-        else:
-            return False
+        return (
+            self.action_type == other.action_type
+            and self.amount == other.amount
+            and self.position == other.position
+        )
 
     def __str__(self):
-        printed = '<' + self.action_type.__str__() + ' ' + self.amount.__str__() + '>'
-        return printed
+        return f'<{self.action_type.__str__()} {self.amount.__str__()}>'
 

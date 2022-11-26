@@ -35,9 +35,7 @@ class Table(QtWidgets.QWidget):
         self.setObjectName('table')
 
         self.number_max_players = 2
-        self.players = []
-        for i in range(0, 2):
-            self.players.append((Player(), QtCore.QPoint()))
+        self.players = [(Player(), QtCore.QPoint()) for _ in range(2)]
         self.players[0][0].set_hand(card.Card(card.Value.EIGHT, card.Color.CLUBS), card.Card(card.Value.KING, card.Color.DIAMONDS))
         # for player, pos in self.players :
         #     player.setHand(card.Card(card.Value.EIGHT, card.Color.CLUBS), card.Card(card.Value.KING, card.Color.DIAMONDS))
@@ -57,10 +55,8 @@ class Table(QtWidgets.QWidget):
         painter.setBrush(QtGui.Qt.green)
         painter.drawEllipse(self.width()/2 - self.a, self.height()/2 - self.b, 2*self.a, 2*self.b)
         self.set_player_pos()
-        k = 0
         for player, pos in self.players:
             player.render(painter, pos)
-            k += 1
         return super().paintEvent(event)
 
     def set_player_pos(self):
@@ -70,12 +66,10 @@ class Table(QtWidgets.QWidget):
             table. An offset of PI/2 is added in order to set the players[0] on the bottom
             side of the table.
         """
-        k = 0
-        for player, pos in self.players:
+        for k, (player, pos) in enumerate(self.players):
             theta = 2*math.pi * k / self.number_max_players + math.pi / 2
             x = self.a * math.cos(theta) + self.a - player.width / 2 + self.width()/2 - self.a
             y = self.b * math.sin(theta) + self.b - player.height / 2 + self.height()/2 - self.b
-            k += 1
             pos.setX(x)
             pos.setY(y)
         self.update()
@@ -121,11 +115,11 @@ class Player(QtWidgets.QWidget):
         self.card_2 = Card()
         self.chips = 0
 
-        self.chips_label = QtWidgets.QLabel(text='Chips : ' + self.chips.__str__())
+        self.chips_label = QtWidgets.QLabel(text=f'Chips : {self.chips.__str__()}')
         self.chips_label.setObjectName('playerChips')
 
         self.layout = QtWidgets.QGridLayout()
-        
+
         self.layout.addWidget(self.card_1, 0, 0)
         self.layout.addWidget(self.card_2, 0, 1)
         self.layout.addWidget(self.chips_label, 1, 0, QtGui.Qt.AlignCenter)
@@ -155,9 +149,9 @@ class Card(QtWidgets.QWidget):
     """
     def __init__(self):
         super().__init__()
-        
+
         self.card = card
-    
+
         self.height = 70
         self.width = 50
         self.x = 0
@@ -229,20 +223,12 @@ class Card(QtWidgets.QWidget):
         self.y = y
 
     def paintEvent(self, event):
-        # Layout paramters of all the card component (color.png, text...) 
-        value_offset_x = 5
-        value_offset_y = 45
-        color_offset_x = 25
-        color_offset_y = 22
-        color_height = 23
-        color_width = 23
-
         painter = QtGui.QPainter(self)
         # Set black borders to all the drawn object
         painter.setPen(QtGui.Qt.black)
 
         # Draw the back of the card if the value or the color is undefined
-        if self.value == '' or self.color == None:
+        if self.value == '' or self.color is None:
             # Draw a border the border of the card
             painter.setBrush(QtGui.Qt.white)
             painter.drawRoundedRect(self.x, self.y, self.width, self.height, 5, 5)
@@ -250,14 +236,21 @@ class Card(QtWidgets.QWidget):
             painter.setBrush(QtGui.Qt.red)
             painter.drawRect(self.x+3, self.y+3, self.width-6, self.height-6)
 
-        # Draw the card showing the value and the color
-        else :
+        else:
             # Draw the card's body
             painter.setBrush(QtGui.Qt.white)
             painter.drawRoundedRect(self.x, self.y, self.width, self.height, 5, 5)
             # Draw the card value
             painter.setFont(self.font)
+            # Layout paramters of all the card component (color.png, text...) 
+            value_offset_x = 5
+            value_offset_y = 45
             painter.drawText(QtCore.QPoint(self.x+value_offset_x, self.y+value_offset_y), self.value)
+            color_offset_x = 25
+            color_offset_y = 22
+            color_height = 23
+            color_width = 23
+
             # Draw the card color
             target = QtCore.QRect(self.x+color_offset_x, self.y+color_offset_y, color_height, color_width)
             painter.drawPixmap(target, self.color)

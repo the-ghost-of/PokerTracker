@@ -79,7 +79,7 @@ def test_parse_preflop():
            "leti5795: calls 20\n" \
            "onucee: calls 10\n" \
            "MaGiCLeTuR: checks"
-    
+
     parser.hand_id = 202004455940
     parser.game_id = 2642898548
     parser.buy_in = 1
@@ -168,7 +168,7 @@ def test_parse_turn():
     parser.players["leti5795"] = "BTN"
     parser.players["onucee"] = "SB"
     parser.players["MaGiCLeTuR"] = "BB"
-    
+
     parser.part_dict['TURN'] = line
 
     parser.parse_turn()
@@ -254,145 +254,141 @@ def test_parse_showdown():
 
 
 def test_parse_hand():
-    file = open(hand_test_file, encoding='UTF-8')
-    line = file.read()
-    parser = PokerStarsParser(line)
-    parser.parse_hand()
+    with open(hand_test_file, encoding='UTF-8') as file:
+        line = file.read()
+        parser = PokerStarsParser(line)
+        parser.parse_hand()
 
-    # Main Header
-    assert parser.hand_id == 202004455940
-    assert parser.game_id == 2642898548
-    assert parser.buy_in == 1
-    assert parser.small_blind == 10
-    assert parser.big_blind == 20
-    # Table Info
-    assert parser.table_name == "2642898548 1"
-    assert parser.table_size == 3
-    assert parser.button_seat == 1
+        # Main Header
+        assert parser.hand_id == 202004455940
+        assert parser.game_id == 2642898548
+        assert parser.buy_in == 1
+        assert parser.small_blind == 10
+        assert parser.big_blind == 20
+        # Table Info
+        assert parser.table_name == "2642898548 1"
+        assert parser.table_size == 3
+        assert parser.button_seat == 1
 
-    # Hand global info
-    assert parser.positions["BTN"] == "leti5795"
-    assert parser.positions["SB"] == "onucee"
-    assert parser.positions["BB"] == "MaGiCLeTuR"
-    assert parser.stacks["BTN"] == 500
-    assert parser.stacks["SB"] == 500
-    assert parser.stacks["BB"] == 500
-    assert parser.players["leti5795"] == "BTN"
-    assert parser.players["onucee"] == "SB"
+        # Hand global info
+        assert parser.positions["BTN"] == "leti5795"
+        assert parser.positions["SB"] == "onucee"
+        assert parser.positions["BB"] == "MaGiCLeTuR"
+        assert parser.stacks["BTN"] == 500
+        assert parser.stacks["SB"] == 500
+        assert parser.stacks["BB"] == 500
+        assert parser.players["leti5795"] == "BTN"
+        assert parser.players["onucee"] == "SB"
 
-    # Hero hand
-    assert parser.cards["BB"][0] == Card(Value.TWO, Color.SPADES)
-    assert parser.cards["BB"][1] == Card(Value.ACE, Color.HEARTS)
+        # Hero hand
+        assert parser.cards["BB"][0] == Card(Value.TWO, Color.SPADES)
+        assert parser.cards["BB"][1] == Card(Value.ACE, Color.HEARTS)
 
-    # preflop actions
-    assert parser.action_preflop.__len__() == 3
-    assert parser.action_preflop[0] == Action("BTN", ActionType.CALL, 20)
-    assert parser.action_preflop[1] == Action("SB", ActionType.CALL, 10)
-    assert parser.action_preflop[2] == Action("BB", ActionType.CHECK, 0)
+        # preflop actions
+        assert parser.action_preflop.__len__() == 3
+        assert parser.action_preflop[0] == Action("BTN", ActionType.CALL, 20)
+        assert parser.action_preflop[1] == Action("SB", ActionType.CALL, 10)
+        assert parser.action_preflop[2] == Action("BB", ActionType.CHECK, 0)
 
-    # Flop
-    assert parser.board_flop.__len__() == 3
-    assert parser.board_flop[0] == Card(Value.FIVE, Color.SPADES)
-    assert parser.board_flop[1] == Card(Value.EIGHT, Color.CLUBS)
-    assert parser.board_flop[2] == Card(Value.TEN, Color.CLUBS)
+        # Flop
+        assert parser.board_flop.__len__() == 3
+        assert parser.board_flop[0] == Card(Value.FIVE, Color.SPADES)
+        assert parser.board_flop[1] == Card(Value.EIGHT, Color.CLUBS)
+        assert parser.board_flop[2] == Card(Value.TEN, Color.CLUBS)
 
-    assert parser.action_flop.__len__() == 3
-    assert parser.action_flop[0] == Action("SB", ActionType.CHECK, 0)
-    assert parser.action_flop[1] == Action("BB", ActionType.CHECK, 0)
-    assert parser.action_flop[2] == Action("BTN", ActionType.CHECK, 0)
-
-
-    # Turn
-    assert parser.board_turn.__len__() == 1
-    assert parser.board_turn[0] == Card(Value.TWO, Color.HEARTS)
-
-    assert parser.action_turn.__len__() == 4
-    assert parser.action_turn[0] == Action("SB", ActionType.CHECK, 0)
-    assert parser.action_turn[1] == Action("BB", ActionType.BET, 30)
-    assert parser.action_turn[2] == Action("BTN", ActionType.FOLD, 0)
-    assert parser.action_turn[3] == Action("SB", ActionType.CALL, 30)
+        assert parser.action_flop.__len__() == 3
+        assert parser.action_flop[0] == Action("SB", ActionType.CHECK, 0)
+        assert parser.action_flop[1] == Action("BB", ActionType.CHECK, 0)
+        assert parser.action_flop[2] == Action("BTN", ActionType.CHECK, 0)
 
 
-    # River
-    assert parser.board_river.__len__() == 1
-    assert parser.board_river[0] == Card(Value.EIGHT, Color.DIAMONDS)
+        # Turn
+        assert parser.board_turn.__len__() == 1
+        assert parser.board_turn[0] == Card(Value.TWO, Color.HEARTS)
 
-    assert parser.action_river.__len__() == 2
-    assert parser.action_river[0] == Action("SB", ActionType.CHECK, 0)
-    assert parser.action_river[1] == Action("BB", ActionType.CHECK, 0)
+        assert parser.action_turn.__len__() == 4
+        assert parser.action_turn[0] == Action("SB", ActionType.CHECK, 0)
+        assert parser.action_turn[1] == Action("BB", ActionType.BET, 30)
+        assert parser.action_turn[2] == Action("BTN", ActionType.FOLD, 0)
+        assert parser.action_turn[3] == Action("SB", ActionType.CALL, 30)
 
-    # Showdown
-    assert parser.cards["SB"].__len__() == 2
-    assert parser.cards["SB"][0] == Card(Value.SEVEN, Color.SPADES)
-    assert parser.cards["SB"][1] == Card(Value.NINE, Color.DIAMONDS)
 
-    assert parser.cards["BB"].__len__() == 2
-    assert parser.cards["BB"][0] == Card(Value.TWO, Color.SPADES)
-    assert parser.cards["BB"][1] == Card(Value.ACE, Color.HEARTS)
+        # River
+        assert parser.board_river.__len__() == 1
+        assert parser.board_river[0] == Card(Value.EIGHT, Color.DIAMONDS)
 
-    file.close()
+        assert parser.action_river.__len__() == 2
+        assert parser.action_river[0] == Action("SB", ActionType.CHECK, 0)
+        assert parser.action_river[1] == Action("BB", ActionType.CHECK, 0)
+
+        # Showdown
+        assert parser.cards["SB"].__len__() == 2
+        assert parser.cards["SB"][0] == Card(Value.SEVEN, Color.SPADES)
+        assert parser.cards["SB"][1] == Card(Value.NINE, Color.DIAMONDS)
+
+        assert parser.cards["BB"].__len__() == 2
+        assert parser.cards["BB"][0] == Card(Value.TWO, Color.SPADES)
+        assert parser.cards["BB"][1] == Card(Value.ACE, Color.HEARTS)
 
 
 def test_load_hand():
-    file = open(hand_test_file, encoding='UTF-8')
-    line = file.read()
-    parser = PokerStarsParser(line)
-    parser.parse_hand()
-    hand = parser.load()
+    with open(hand_test_file, encoding='UTF-8') as file:
+        line = file.read()
+        parser = PokerStarsParser(line)
+        parser.parse_hand()
+        hand = parser.load()
 
-    # Game and Hand ID
-    assert hand.id == parser.hand_id
-    assert hand.game_id == parser.game_id
-    
-    # General Information
-    assert hand.date == parser.date
-    assert hand.hour == parser.hour
-    assert hand.dealer == parser.positions['BTN']
-    assert hand.small_blind == parser.small_blind
-    assert hand.big_blind == parser.big_blind
-    assert hand.ante == parser.ante
+        # Game and Hand ID
+        assert hand.id == parser.hand_id
+        assert hand.game_id == parser.game_id
 
-    # Game init
-    assert hand.seats['BTN'].player == "leti5795"
-    assert hand.seats['BTN'].stack == 500
-    assert hand.seats['BTN'].cards[0] == Card()
-    assert hand.seats['BTN'].cards[1] == Card()
+        # General Information
+        assert hand.date == parser.date
+        assert hand.hour == parser.hour
+        assert hand.dealer == parser.positions['BTN']
+        assert hand.small_blind == parser.small_blind
+        assert hand.big_blind == parser.big_blind
+        assert hand.ante == parser.ante
 
-    assert hand.seats['SB'].player == "onucee"
-    assert hand.seats['SB'].stack == 500
-    assert hand.seats['SB'].cards[0] == Card(Value.SEVEN, Color.SPADES)
-    assert hand.seats['SB'].cards[1] == Card(Value.NINE, Color.DIAMONDS)
+        # Game init
+        assert hand.seats['BTN'].player == "leti5795"
+        assert hand.seats['BTN'].stack == 500
+        assert hand.seats['BTN'].cards[0] == Card()
+        assert hand.seats['BTN'].cards[1] == Card()
 
-    assert hand.seats['BB'].player == "MaGiCLeTuR"
-    assert hand.seats['BB'].stack == 500
-    assert hand.seats['BB'].cards[0] == Card(Value.TWO, Color.SPADES)
-    assert hand.seats['BB'].cards[1] == Card(Value.ACE, Color.HEARTS)
+        assert hand.seats['SB'].player == "onucee"
+        assert hand.seats['SB'].stack == 500
+        assert hand.seats['SB'].cards[0] == Card(Value.SEVEN, Color.SPADES)
+        assert hand.seats['SB'].cards[1] == Card(Value.NINE, Color.DIAMONDS)
 
-    # Board Flop
-    assert hand.board_flop[0] == parser.board_flop[0]
-    assert hand.board_flop[1] == parser.board_flop[1]
-    assert hand.board_flop[2] == parser.board_flop[2]
+        assert hand.seats['BB'].player == "MaGiCLeTuR"
+        assert hand.seats['BB'].stack == 500
+        assert hand.seats['BB'].cards[0] == Card(Value.TWO, Color.SPADES)
+        assert hand.seats['BB'].cards[1] == Card(Value.ACE, Color.HEARTS)
 
-    # Board Turn
-    assert hand.board_turn[0] == parser.board_turn[0]
+        # Board Flop
+        assert hand.board_flop[0] == parser.board_flop[0]
+        assert hand.board_flop[1] == parser.board_flop[1]
+        assert hand.board_flop[2] == parser.board_flop[2]
 
-    # Board River
-    assert hand.board_river[0] == parser.board_river[0]
+        # Board Turn
+        assert hand.board_turn[0] == parser.board_turn[0]
 
-    # Action Preflop
-    for i in range(0, hand.action_preflop.__len__()):
-        assert hand.action_preflop[i] == parser.action_preflop[i]
+        # Board River
+        assert hand.board_river[0] == parser.board_river[0]
 
-    # Action Flop
-    for i in range(0, hand.action_flop.__len__()):
-        assert hand.action_flop[i] == parser.action_flop[i]
-    
-    # Action Turn
-    for i in range(0, hand.action_turn.__len__()):
-        assert hand.action_turn[i] == parser.action_turn[i]
-    
-    # Action River
-    for i in range(0, hand.action_river.__len__()):
-        assert hand.action_river[i] == parser.action_river[i]
-    
-    file.close()
+            # Action Preflop
+        for i in range(hand.action_preflop.__len__()):
+            assert hand.action_preflop[i] == parser.action_preflop[i]
+
+            # Action Flop
+        for i in range(hand.action_flop.__len__()):
+            assert hand.action_flop[i] == parser.action_flop[i]
+
+            # Action Turn
+        for i in range(hand.action_turn.__len__()):
+            assert hand.action_turn[i] == parser.action_turn[i]
+
+            # Action River
+        for i in range(hand.action_river.__len__()):
+            assert hand.action_river[i] == parser.action_river[i]
