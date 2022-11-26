@@ -143,20 +143,20 @@ def read_action(line):
     """
     try:
         reg_action = re.search(r'(.+): ([a-z]+)', line)
-        player_pseudo = reg_action.group(1)
-        action_type = define_action(reg_action.group(2))
+        player_pseudo = reg_action[1]
+        action_type = define_action(reg_action[2])
         if action_type == ActionType.CHECK:
             return [player_pseudo, action_type, 0]
         elif action_type == ActionType.FOLD:
             return [player_pseudo, action_type, 0]
         elif action_type == ActionType.CALL:
-            amount = float(re.search(' €?([0-9-.]+)', line).group(1))
+            amount = float(re.search(' €?([0-9-.]+)', line)[1])
             return [player_pseudo, action_type, amount]
         elif action_type == ActionType.BET:
-            amount = float(re.search(' €?([0-9-.]+)', line).group(1))
+            amount = float(re.search(' €?([0-9-.]+)', line)[1])
             return [player_pseudo, action_type, amount]
         elif action_type == ActionType.RAISE:
-            amount = float(re.search('to €?([0-9-.]+)', line).group(1))
+            amount = float(re.search('to €?([0-9-.]+)', line)[1])
             return [player_pseudo, action_type, amount]
         else:
             return [None, None, None]
@@ -274,11 +274,8 @@ class PokerStarsParser:
             Returns:
                 Return a dict of the different division of the hand history
         """
-        parts = []
-        for part in re.split(r'\*\*\* ([A-Z- ]+) \*\*\*', self.hand_file):  # return [ 'part1', 'splitter1', 'part2',..
-            parts.append(part)
-
-        for i in range(0, len(parts)):
+        parts = list(re.split(r'\*\*\* ([A-Z- ]+) \*\*\*', self.hand_file))
+        for i in range(len(parts)):
             if i == 0:
                 self.part_dict['HEADER'] = parts[i]
             if i % 2 != 0:  # number is odd
@@ -297,51 +294,48 @@ class PokerStarsParser:
             for line in lines:
 
                 # parse first part of the header : PokerStars basic info
-                if line[0:5] == "Poker":
+                if line[:5] == "Poker":
                     # find hand id
                     reg_hand_id = re.search(r'Hand #([0-9-]+):', line)
-                    self.hand_id = int(reg_hand_id.group(1))
+                    self.hand_id = int(reg_hand_id[1])
                     # find tournament id
                     try:
                         reg_game_id = re.search(r'Tournament #([0-9]+),', line)
-                        self.game_id = int(reg_game_id.group(1))
+                        self.game_id = int(reg_game_id[1])
                     except AttributeError:
                         pass
                     # find blind
                     reg_blind = re.search(r'\(€?([0-9-.]+)/€?([0-9-.]+)( EUR)?\)', line)
-                    self.small_blind = float(reg_blind.group(1))
-                    self.big_blind = float(reg_blind.group(2))
+                    self.small_blind = float(reg_blind[1])
+                    self.big_blind = float(reg_blind[2])
                     # find buy in
                     try:
                         reg_buy_in = re.search(r'€?([0-9-.]+)\+€?([0-9-.]+)( EUR)?', line)
-                        self.buy_in = float(reg_buy_in.group(1)) + float(reg_buy_in.group(2))
-                        self.rake = float(reg_buy_in.group(2))
+                        self.buy_in = float(reg_buy_in[1]) + float(reg_buy_in[2])
+                        self.rake = float(reg_buy_in[2])
                     except AttributeError:
                         pass
 
-                # parse second part of the header : Table info
-                elif line[0:5] == "Table":
+                elif line[:5] == "Table":
                     # find table name
                     reg_table_name = re.search(r'Table \'([0-9A-Za-z ]+)\'', line)
-                    self.table_name = reg_table_name.group(1)
+                    self.table_name = reg_table_name[1]
                     # find table size
                     try:
                         reg_table_size = re.search(r'([0-9]+)-max', line)
-                        self.table_size = int(reg_table_size.group(1))
+                        self.table_size = int(reg_table_size[1])
                     except AttributeError:
                         pass
                     # find button position
                     reg_button_position = re.search(r'Seat #([0-9]+)', line)
-                    self.button_seat = int(reg_button_position.group(1))
+                    self.button_seat = int(reg_button_position[1])
 
-                # count the number of players in the game
-                elif line[0:4] == "Seat":
+                elif line[:4] == "Seat":
                     players_number += 1
                     self.players_number = players_number
         except AttributeError:
             # TODO: Add a better log manager
             self.logger.warning("There is no HEADER in the current file.")
-            pass
 
     def parse_setup(self):
         """ Parse the setup part which set the players pseudo, position and stack
@@ -351,11 +345,11 @@ class PokerStarsParser:
         """
         lines = self.part_dict['HEADER'].split('\n')
         for line in lines:
-            if line[0:4] == "Seat":
+            if line[:4] == "Seat":
                 reg_player = re.search(r'(.): (.+) \(€?([0-9-.]+)', line)
-                player_seat = int(reg_player.group(1))
-                player_name = reg_player.group(2)
-                player_stack = float(reg_player.group(3))
+                player_seat = int(reg_player[1])
+                player_name = reg_player[2]
+                player_stack = float(reg_player[3])
                 position = self.position(player_seat)
                 self.positions[position] = player_name
                 self.players[player_name] = position
@@ -387,20 +381,22 @@ class PokerStarsParser:
         try:
             lines = self.part_dict['HOLE CARDS'].split('\n')
             for line in lines:
-                if line[0:5] == "Dealt":
+                if line[:5] == "Dealt":
                     try:
                         reg_hero_hand = re.search(r'Dealt to (.+) \[(.+)\]', line)
-                        hand = reg_hero_hand.group(2).split(' ')
+                        hand = reg_hero_hand[2].split(' ')
                         # set the cards of the player
-                        self.cards[self.players[reg_hero_hand.group(1)]] = [define_card(hand[0]), define_card(hand[1])]
+                        self.cards[self.players[reg_hero_hand[1]]] = [
+                            define_card(hand[0]),
+                            define_card(hand[1]),
+                        ]
+
                     except AttributeError:
                         pass
-                if line[0:8] == "Uncalled":
+                if line[:8] == "Uncalled":
                     # TODO: add a better Uncalled manager
                     break
-                elif line == '':
-                    pass
-                else:
+                elif line != '':
                     try:
                         pseudo, action_type, amount = read_action(line)
                         self.action_preflop.append(Action(self.players[pseudo], action_type, amount))
@@ -412,21 +408,19 @@ class PokerStarsParser:
     def parse_flop(self):
         try:
             lines = self.part_dict['FLOP'].split('\n')
-            for i in range(0, len(lines)):
+            for i in range(len(lines)):
                 if i == 0:
                     try:
                         reg_board = re.search(r'\[(.+)\]', lines[i])
-                        board = reg_board.group(1).split(' ')
+                        board = reg_board[1].split(' ')
                         for card in board:
                             self.board_flop.append(define_card(card))
                     except AttributeError:
                         pass
-                elif lines[i][0:8] == "Uncalled":
+                elif lines[i][:8] == "Uncalled":
                     # TODO: add a better Uncalled manager
                     break
-                elif lines[i] == '':
-                    pass
-                else:
+                elif lines[i] != '':
                     try:
                         pseudo, action_type, amount = read_action(lines[i])
                         self.action_flop.append(Action(self.players[pseudo], action_type, amount))
@@ -438,21 +432,19 @@ class PokerStarsParser:
     def parse_turn(self):
         try:
             lines = self.part_dict['TURN'].split('\n')
-            for i in range(0, len(lines)):
+            for i in range(len(lines)):
                 if i == 0:
                     try:
                         reg_board = re.search(r'\[(.+)\] \[(.+)\]', lines[i])
-                        board = reg_board.group(2).split(' ')
+                        board = reg_board[2].split(' ')
                         for card in board:
                             self.board_turn.append(define_card(card))
                     except AttributeError:
                         pass
-                elif lines[i][0:8] == "Uncalled":
+                elif lines[i][:8] == "Uncalled":
                     # TODO: add a better Uncalled manager
                     break
-                elif lines[i] == '':
-                    pass
-                else:
+                elif lines[i] != '':
                     try:
                         pseudo, action_type, amount = read_action(lines[i])
                         self.action_turn.append(Action(self.players[pseudo], action_type, amount))
@@ -464,21 +456,19 @@ class PokerStarsParser:
     def parse_river(self):
         try:
             lines = self.part_dict['RIVER'].split('\n')
-            for i in range(0, len(lines)):
+            for i in range(len(lines)):
                 if i == 0:
                     try:
                         reg_board = re.search(r'\[(.+)\] \[(.+)\]', lines[i])
-                        board = reg_board.group(2).split(' ')
+                        board = reg_board[2].split(' ')
                         for card in board:
                             self.board_river.append(define_card(card))
                     except AttributeError:
                         pass
-                elif lines[i][0:8] == "Uncalled":
+                elif lines[i][:8] == "Uncalled":
                     # TODO: add a better Uncalled manager
                     break
-                elif lines[i] == '':
-                    pass
-                else:
+                elif lines[i] != '':
                     try:
                         pseudo, action_type, amount = read_action(lines[i])
                         self.action_river.append(Action(self.players[pseudo], action_type, amount))
@@ -493,11 +483,9 @@ class PokerStarsParser:
             for line in lines:
                 try:
                     reg_show = re.search(r'(.+): shows \[(.+)\]', line)
-                    player = reg_show.group(1)
-                    hand = reg_show.group(2).split(' ')
-                    cards = []
-                    for card in hand:
-                        cards.append(define_card(card))
+                    player = reg_show[1]
+                    hand = reg_show[2].split(' ')
+                    cards = [define_card(card) for card in hand]
                     try:
                         if self.cards[self.players[player]].__len__() > len(cards):
                             self.cards[self.players[player]] = cards

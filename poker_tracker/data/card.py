@@ -52,11 +52,7 @@ class Card:
         self.color = color
 
     def __eq__(self, other):
-        if self.value == other.value and self.color == other.color:
-            return True
-        else:
-            return False
+        return self.value == other.value and self.color == other.color
 
     def __str__(self):
-        printed = '<' + self.value.__str__() + '>' + '<' + self.color.__str__() + '>'
-        return printed
+        return f'<{self.value.__str__()}><{self.color.__str__()}>'

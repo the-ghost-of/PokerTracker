@@ -82,5 +82,4 @@ class Hand:
         self.action_river = []
 
     def __str__(self):
-        printed = '<' + "Hand Id : " + str(self.id) + '>'
-        return printed
+        return '<' + "Hand Id : " + str(self.id) + '>'

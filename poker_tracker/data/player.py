@@ -21,5 +21,4 @@ class Player:
         self.games = []
 
     def __str__(self):
-        printed = '<' + self.pseudo + '>'
-        return printed
+        return f'<{self.pseudo}>'
